@@ -1,7 +1,7 @@
 import express from 'express';
+import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
 import taskRoutes from './routes/taskRoutes';
@@ -22,12 +22,6 @@ app.use(bodyParser.json());
 // Routas
 app.use('/', taskRoutes);
 
-// Configure port
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
 // Connect to MongoDB
 mongoose
   .connect(mongoUri)
@@ -37,3 +31,14 @@ mongoose
   .catch((err) => {
     console.error('Error connecting to MongoDB:', err);
   });
+
+app.use((req, res, next) => {
+  console.log('Authorization Header:', req.headers.authorization);
+  next();
+});
+  
+// Configure port
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
