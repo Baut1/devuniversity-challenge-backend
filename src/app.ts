@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 // Routas
 app.use('/', taskRoutes);
 
-// Connect to MongoDB
+// connect to MongoDB
 mongoose
   .connect(mongoUri)
   .then(() => {
