@@ -21,7 +21,7 @@ app.use((0, cors_1.default)());
 app.use(body_parser_1.default.json());
 // Routas
 app.use('/', taskRoutes_1.default);
-// Connect to MongoDB
+// connect to MongoDB
 mongoose_1.default
     .connect(mongoUri)
     .then(() => {

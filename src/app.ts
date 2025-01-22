@@ -8,6 +8,7 @@ import taskRoutes from './routes/taskRoutes';
 
 // load env vars (MONGO_URI, etc)
 dotenv.config();
+
 const mongoUri = process.env.MONGO_URI;
 if (!mongoUri) {
     throw new Error('MONGO_URI is not defined in the environment variables');
