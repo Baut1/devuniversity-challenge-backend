@@ -16,8 +16,14 @@ exports.deleteTask = exports.createTask = exports.getTasks = void 0;
 const Task_1 = __importDefault(require("../models/Task"));
 // GET
 const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // get from token
+    if (!userId) {
+        res.status(401).json({ message: 'User not authenticated' });
+        return;
+    }
     try {
-        const tasks = yield Task_1.default.find();
+        const tasks = yield Task_1.default.find({ userId });
         res.status(200).json(tasks);
     }
     catch (error) {
@@ -27,9 +33,19 @@ const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.getTasks = getTasks;
 // POST
 const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { title } = req.body;
+    const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // auth0 user
+    if (!userId) {
+        res.status(401).json({ message: 'User not authenticated' });
+        return;
+    }
     try {
-        const { title, description } = req.body;
-        const newTask = new Task_1.default({ title, description });
+        const newTask = new Task_1.default({
+            title,
+            completed: false,
+            userId,
+        });
         const savedTask = yield newTask.save();
         res.status(201).json(savedTask);
     }
@@ -40,14 +56,20 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.createTask = createTask;
 // DELETE
 const deleteTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { id } = req.params;
+    const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // auth0 user
+    if (!userId) {
+        res.status(401).json({ message: 'User not authenticated' });
+        return;
+    }
     try {
-        const { id } = req.params;
-        const deletedTask = yield Task_1.default.findByIdAndDelete(id);
-        if (!deletedTask) {
-            res.status(404).json({ message: 'Task not found' });
+        const task = yield Task_1.default.findOneAndDelete({ _id: id, userId }); // Aseguramos que coincida con el userId
+        if (!task) {
+            res.status(404).json({ message: 'Task not found or unauthorized' });
             return;
         }
-        res.status(200).json({ message: 'Task deleted successfully', task: deletedTask });
+        res.status(200).json({ message: 'Task deleted successfully' });
     }
     catch (error) {
         res.status(500).json({ message: 'Error deleting task', error });

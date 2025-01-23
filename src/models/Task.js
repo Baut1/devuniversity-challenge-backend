@@ -34,10 +34,12 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
+// mongoose schema
 const TaskSchema = new mongoose_1.Schema({
     title: { type: String, required: true },
-    description: { type: String },
     completed: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
-});
-exports.default = mongoose_1.default.model('Task', TaskSchema);
+    userId: { type: String, required: true },
+}, { timestamps: true } // includes createdAt and updatedAt automatically
+);
+const Task = mongoose_1.default.model('Task', TaskSchema);
+exports.default = Task;

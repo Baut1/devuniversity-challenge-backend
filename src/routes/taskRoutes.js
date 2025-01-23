@@ -4,11 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const authMiddleware_1 = __importDefault(require("../middlewares/authMiddleware")); // Importa el middleware de autenticación
+const authMiddleware_1 = __importDefault(require("../middlewares/authMiddleware")); // import auth middleware
 const taskController_1 = require("../controllers/taskController");
 const router = (0, express_1.Router)();
-// Rutas protegidas, solo usuarios autenticados pueden acceder
+// get all tasks
 router.get('/api/tasks', authMiddleware_1.default, taskController_1.getTasks);
+// post new task
 router.post('/api/tasks', authMiddleware_1.default, taskController_1.createTask);
+// delete task
 router.delete('/api/tasks/:id', authMiddleware_1.default, taskController_1.deleteTask);
 exports.default = router;

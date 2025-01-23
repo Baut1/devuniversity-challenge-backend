@@ -1,17 +1,22 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-interface ITask extends Document {
+// interface
+export interface TaskDocument extends Document {
   title: string;
-  description: string;
   completed: boolean;
-  createdAt: Date;
+  userId: string; // user unique id (Auth0 `sub`)
 }
 
-const TaskSchema: Schema = new Schema({
-  title: { type: String, required: true },
-  description: { type: String },
-  completed: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-});
+// mongoose schema
+const TaskSchema = new Schema<TaskDocument>(
+  {
+    title: { type: String, required: true },
+    completed: { type: Boolean, default: false },
+    userId: { type: String, required: true },
+  },
+  { timestamps: true } // includes createdAt and updatedAt automatically
+);
 
-export default mongoose.model<ITask>('Task', TaskSchema);
+const Task = mongoose.model<TaskDocument>('Task', TaskSchema);
+
+export default Task;
