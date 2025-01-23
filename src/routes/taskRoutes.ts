@@ -1,12 +1,16 @@
 import { Router } from 'express';
-import checkJwt from '../middlewares/authMiddleware'; // Importa el middleware de autenticación
+import checkJwt from '../middlewares/authMiddleware'; // import auth middleware
 import { getTasks, createTask, deleteTask } from '../controllers/taskController';
 
 const router = Router();
 
-// Rutas protegidas, solo usuarios autenticados pueden acceder
+// get all tasks
 router.get('/api/tasks', checkJwt, getTasks);
+
+// post new task
 router.post('/api/tasks', checkJwt, createTask);
+
+// delete task
 router.delete('/api/tasks/:id', checkJwt, deleteTask);
 
 export default router;

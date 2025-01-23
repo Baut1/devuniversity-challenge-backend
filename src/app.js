@@ -7,7 +7,7 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const body_parser_1 = __importDefault(require("body-parser"));
-const mongoose_1 = __importDefault(require("mongoose"));
+const db_1 = __importDefault(require("./utils/db"));
 const taskRoutes_1 = __importDefault(require("./routes/taskRoutes"));
 // load env vars (MONGO_URI, etc)
 dotenv_1.default.config();
@@ -22,18 +22,7 @@ app.use(body_parser_1.default.json());
 // Routas
 app.use('/', taskRoutes_1.default);
 // connect to MongoDB
-mongoose_1.default
-    .connect(mongoUri)
-    .then(() => {
-    console.log('Connected to MongoDB');
-})
-    .catch((err) => {
-    console.error('Error connecting to MongoDB:', err);
-});
-app.use((req, res, next) => {
-    console.log('Authorization Header:', req.headers.authorization);
-    next();
-});
+(0, db_1.default)();
 // Configure port
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
