@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import mongoose from 'mongoose';
+import connectDB from './utils/db';
 
 import taskRoutes from './routes/taskRoutes';
 
@@ -24,19 +24,7 @@ app.use(bodyParser.json());
 app.use('/', taskRoutes);
 
 // connect to MongoDB
-mongoose
-  .connect(mongoUri)
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((err) => {
-    console.error('Error connecting to MongoDB:', err);
-  });
-
-app.use((req, res, next) => {
-  console.log('Authorization Header:', req.headers.authorization);
-  next();
-});
+connectDB();
   
 // Configure port
 const PORT = process.env.PORT || 5000;
