@@ -13,4 +13,6 @@ router.get('/api/tasks', authMiddleware_1.default, taskController_1.getTasks);
 router.post('/api/tasks', authMiddleware_1.default, taskController_1.createTask);
 // delete task
 router.delete('/api/tasks/:id', authMiddleware_1.default, taskController_1.deleteTask);
+// PATCH task´s status
+router.patch('/api/tasks/:id', authMiddleware_1.default, taskController_1.updateTaskStatus);
 exports.default = router;

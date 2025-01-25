@@ -62,3 +62,34 @@ export const deleteTask = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ message: 'Error deleting task', error });
   }
 };
+
+// PATCH: update a task when completed or not
+export const updateTaskStatus = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params; // ID of the task to update
+  const { completed } = req.body; // new state (true/false)
+  const userId = req.auth?.sub; // obtain ID of user from token
+
+  // Check if user was found
+  if (!userId) {
+    res.status(401).json({ message: 'User not authenticated' });
+    return;
+  }
+
+  try {
+    // find and update task
+    const updatedTask = await Task.findOneAndUpdate(
+      { _id: id, userId }, // making sure the task belongs to the user
+      { completed }, // updating the completed field
+      { new: true } // returning the updated task
+    );    
+
+    if (!updatedTask) {
+      res.status(404).json({ message: 'Task not found or unauthorized' });
+      return;
+    }
+
+    res.status(200).json(updatedTask);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating task status', error });
+  }
+};
