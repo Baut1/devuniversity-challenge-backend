@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteTask = exports.createTask = exports.getTasks = void 0;
+exports.updateTaskStatus = exports.deleteTask = exports.createTask = exports.getTasks = void 0;
 const Task_1 = __importDefault(require("../models/Task"));
 // GET
 const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -76,3 +76,31 @@ const deleteTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteTask = deleteTask;
+// PATCH: update a task when completed or not
+const updateTaskStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { id } = req.params; // ID of the task to update
+    const { completed } = req.body; // new state (true/false)
+    const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // obtain ID of user from token
+    // Check if user was found
+    if (!userId) {
+        res.status(401).json({ message: 'User not authenticated' });
+        return;
+    }
+    try {
+        // find and update task
+        const updatedTask = yield Task_1.default.findOneAndUpdate({ _id: id, userId }, // making sure the task belongs to the user
+        { completed }, // updating the completed field
+        { new: true } // returning the updated task
+        );
+        if (!updatedTask) {
+            res.status(404).json({ message: 'Task not found or unauthorized' });
+            return;
+        }
+        res.status(200).json(updatedTask);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error updating task status', error });
+    }
+});
+exports.updateTaskStatus = updateTaskStatus;
