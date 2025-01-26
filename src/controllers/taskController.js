@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateTaskStatus = exports.deleteTask = exports.createTask = exports.getTasks = void 0;
+exports.updateTaskStatus = exports.deleteTask = exports.createTask = exports.getTaskById = exports.getTasks = void 0;
 const Task_1 = __importDefault(require("../models/Task"));
 // GET
 const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -31,6 +31,29 @@ const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getTasks = getTasks;
+// GET: Obtener una tarea específica por ID
+const getTaskById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { id } = req.params; // ID de la tarea
+    const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // ID del usuario desde el token
+    if (!userId) {
+        res.status(401).json({ message: 'User not authenticated' });
+        return;
+    }
+    try {
+        // Busca la tarea asegurándose de que pertenezca al usuario
+        const task = yield Task_1.default.findOne({ _id: id, userId });
+        if (!task) {
+            res.status(404).json({ message: 'Task not found or unauthorized' });
+            return;
+        }
+        res.status(200).json(task);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error fetching task', error });
+    }
+});
+exports.getTaskById = getTaskById;
 // POST
 const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
