@@ -9,6 +9,7 @@ const cors_1 = __importDefault(require("cors"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const db_1 = __importDefault(require("./utils/db"));
 const errorHandler_1 = require("./middlewares/errorHandler");
+const swagger_1 = require("./utils/swagger");
 const taskRoutes_1 = __importDefault(require("./routes/taskRoutes"));
 // load env vars (MONGO_URI, etc)
 dotenv_1.default.config();
@@ -20,6 +21,8 @@ const app = (0, express_1.default)();
 // Middlewares
 app.use((0, cors_1.default)());
 app.use(body_parser_1.default.json());
+// Swagger docs
+app.use('/api-docs', swagger_1.swaggerUiServe, swagger_1.swaggerUiSetup);
 // Routas
 app.use('/', taskRoutes_1.default);
 // error handling middleware
