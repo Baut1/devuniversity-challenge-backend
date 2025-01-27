@@ -4,6 +4,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import connectDB from './utils/db';
 import { errorHandler } from './middlewares/errorHandler';
+import { swaggerUiServe, swaggerUiSetup } from './utils/swagger';
 
 import taskRoutes from './routes/taskRoutes';
 
@@ -20,6 +21,9 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(bodyParser.json());
+
+// Swagger docs
+app.use('/api-docs', swaggerUiServe, swaggerUiSetup);
 
 // Routas
 app.use('/', taskRoutes);
