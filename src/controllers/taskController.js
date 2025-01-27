@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateTaskStatus = exports.deleteTask = exports.createTask = exports.getTaskById = exports.getTasks = void 0;
+exports.updateTask = exports.deleteTask = exports.createTask = exports.getTaskById = exports.getTasks = void 0;
 const Task_1 = __importDefault(require("../models/Task"));
 // GET
 const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -99,31 +99,47 @@ const deleteTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteTask = deleteTask;
-// PATCH: update a task when completed or not
-const updateTaskStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// PATCH: update the title and/or status of a task
+const updateTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const { id } = req.params; // ID of the task to update
-    const { completed } = req.body; // new state (true/false)
+    const { title, completed } = req.body; // new title and/or completed status
     const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // obtain ID of user from token
     // Check if user was found
     if (!userId) {
         res.status(401).json({ message: 'User not authenticated' });
         return;
     }
+    // Check if at least one field (title or completed) is provided
+    if (title === undefined && completed === undefined) {
+        res.status(400).json({ message: 'At least one field (title or completed) is required' });
+        return;
+    }
     try {
-        // find and update task
-        const updatedTask = yield Task_1.default.findOneAndUpdate({ _id: id, userId }, // making sure the task belongs to the user
-        { completed }, // updating the completed field
-        { new: true } // returning the updated task
+        // Create an object with the fields to update
+        const updateFields = {};
+        if (title !== undefined) {
+            updateFields.title = title;
+        }
+        if (completed !== undefined) {
+            updateFields.completed = completed;
+        }
+        // Find and update the task
+        const updatedTask = yield Task_1.default.findOneAndUpdate({ _id: id, userId }, // Ensure the task belongs to the user
+        updateFields, // Update the provided fields
+        { new: true } // Return the updated task
         );
+        // If task is not found or unauthorized
         if (!updatedTask) {
             res.status(404).json({ message: 'Task not found or unauthorized' });
             return;
         }
+        // Return the updated task
         res.status(200).json(updatedTask);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error updating task status', error });
+        // Handle errors
+        res.status(500).json({ message: 'Error updating task', error });
     }
 });
-exports.updateTaskStatus = updateTaskStatus;
+exports.updateTask = updateTask;

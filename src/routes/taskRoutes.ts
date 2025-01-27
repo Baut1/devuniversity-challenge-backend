@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import checkJwt from '../middlewares/authMiddleware'; // import auth middleware
-import { getTasks, getTaskById, createTask, deleteTask, updateTaskStatus } from '../controllers/taskController';
+import { getTasks, getTaskById, createTask, deleteTask, updateTask } from '../controllers/taskController';
 
 const router = Router();
 
@@ -16,7 +16,7 @@ router.post('/api/tasks', checkJwt, createTask);
 // delete task
 router.delete('/api/tasks/:id', checkJwt, deleteTask);
 
-// PATCH task´s status
-router.patch('/api/tasks/:id', checkJwt, updateTaskStatus);
+// PATCH task
+router.patch('/api/tasks/:id', checkJwt, updateTask);
 
 export default router;
