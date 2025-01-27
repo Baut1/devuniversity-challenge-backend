@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import connectDB from './utils/db';
+import { errorHandler } from './middlewares/errorHandler';
 
 import taskRoutes from './routes/taskRoutes';
 
@@ -22,6 +23,9 @@ app.use(bodyParser.json());
 
 // Routas
 app.use('/', taskRoutes);
+
+// error handling middleware
+app.use(errorHandler);
 
 // connect to MongoDB
 connectDB();

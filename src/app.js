@@ -8,6 +8,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const db_1 = __importDefault(require("./utils/db"));
+const errorHandler_1 = require("./middlewares/errorHandler");
 const taskRoutes_1 = __importDefault(require("./routes/taskRoutes"));
 // load env vars (MONGO_URI, etc)
 dotenv_1.default.config();
@@ -21,6 +22,8 @@ app.use((0, cors_1.default)());
 app.use(body_parser_1.default.json());
 // Routas
 app.use('/', taskRoutes_1.default);
+// error handling middleware
+app.use(errorHandler_1.errorHandler);
 // connect to MongoDB
 (0, db_1.default)();
 // Configure port

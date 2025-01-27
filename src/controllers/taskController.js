@@ -14,20 +14,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateTask = exports.deleteTask = exports.createTask = exports.getTaskById = exports.getTasks = void 0;
 const Task_1 = __importDefault(require("../models/Task"));
+const errorHandler_1 = require("../middlewares/errorHandler");
 // GET
 const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // get from token
     if (!userId) {
-        res.status(401).json({ message: 'User not authenticated' });
-        return;
+        throw new errorHandler_1.AppError('User not authenticated', 401);
     }
     try {
         const tasks = yield Task_1.default.find({ userId });
         res.status(200).json(tasks);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching tasks', error });
+        throw new errorHandler_1.AppError('Error fetching tasks', 500);
     }
 });
 exports.getTasks = getTasks;
@@ -37,20 +37,18 @@ const getTaskById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const { id } = req.params; // ID de la tarea
     const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // ID del usuario desde el token
     if (!userId) {
-        res.status(401).json({ message: 'User not authenticated' });
-        return;
+        throw new errorHandler_1.AppError('User not authenticated', 401);
     }
     try {
         // Busca la tarea asegurándose de que pertenezca al usuario
         const task = yield Task_1.default.findOne({ _id: id, userId });
         if (!task) {
-            res.status(404).json({ message: 'Task not found or unauthorized' });
-            return;
+            throw new errorHandler_1.AppError('Task not found or unauthorized', 404);
         }
         res.status(200).json(task);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching task', error });
+        throw new errorHandler_1.AppError('Error fetching task', 500);
     }
 });
 exports.getTaskById = getTaskById;
@@ -60,8 +58,10 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const { title } = req.body;
     const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // auth0 user
     if (!userId) {
-        res.status(401).json({ message: 'User not authenticated' });
-        return;
+        throw new errorHandler_1.AppError('User not authenticated', 401);
+    }
+    if (!title) {
+        throw new errorHandler_1.AppError('Title is required', 400);
     }
     try {
         const newTask = new Task_1.default({
@@ -73,7 +73,7 @@ const createTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(201).json(savedTask);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error creating task', error });
+        throw new errorHandler_1.AppError('Error creating task', 500);
     }
 });
 exports.createTask = createTask;
@@ -83,19 +83,17 @@ const deleteTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const { id } = req.params;
     const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // auth0 user
     if (!userId) {
-        res.status(401).json({ message: 'User not authenticated' });
-        return;
+        throw new errorHandler_1.AppError('User not authenticated', 401);
     }
     try {
         const task = yield Task_1.default.findOneAndDelete({ _id: id, userId }); // Aseguramos que coincida con el userId
         if (!task) {
-            res.status(404).json({ message: 'Task not found or unauthorized' });
-            return;
+            throw new errorHandler_1.AppError('Task not found or unauthorized', 404);
         }
         res.status(200).json({ message: 'Task deleted successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error deleting task', error });
+        throw new errorHandler_1.AppError('Error deleting task', 500);
     }
 });
 exports.deleteTask = deleteTask;
@@ -107,8 +105,7 @@ const updateTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const userId = (_a = req.auth) === null || _a === void 0 ? void 0 : _a.sub; // obtain ID of user from token
     // Check if user was found
     if (!userId) {
-        res.status(401).json({ message: 'User not authenticated' });
-        return;
+        throw new errorHandler_1.AppError('User not authenticated', 401);
     }
     // Check if at least one field (title or completed) is provided
     if (title === undefined && completed === undefined) {
@@ -131,15 +128,13 @@ const updateTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         );
         // If task is not found or unauthorized
         if (!updatedTask) {
-            res.status(404).json({ message: 'Task not found or unauthorized' });
-            return;
+            throw new errorHandler_1.AppError('Task not found or unauthorized', 404);
         }
         // Return the updated task
         res.status(200).json(updatedTask);
     }
     catch (error) {
-        // Handle errors
-        res.status(500).json({ message: 'Error updating task', error });
+        throw new errorHandler_1.AppError('Error updating task', 500);
     }
 });
 exports.updateTask = updateTask;

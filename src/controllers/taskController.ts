@@ -1,19 +1,19 @@
 import { Request, Response } from 'express';
 import Task from '../models/Task';
+import { AppError } from '../middlewares/errorHandler';
 
 // GET
 export const getTasks = async (req: Request, res: Response): Promise<void> => {
   const userId = req.auth?.sub; // get from token
   if (!userId) {
-    res.status(401).json({ message: 'User not authenticated' });
-    return;
+    throw new AppError('User not authenticated', 401);
   }
 
   try {
     const tasks = await Task.find({ userId });
     res.status(200).json(tasks);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching tasks', error });
+    throw new AppError('Error fetching tasks', 500);
   }
 };
 
@@ -23,21 +23,19 @@ export const getTaskById = async (req: Request, res: Response): Promise<void> =>
   const userId = req.auth?.sub; // ID del usuario desde el token
 
   if (!userId) {
-    res.status(401).json({ message: 'User not authenticated' });
-    return;
+    throw new AppError('User not authenticated', 401);
   }
 
   try {
     // Busca la tarea asegurándose de que pertenezca al usuario
     const task = await Task.findOne({ _id: id, userId });
     if (!task) {
-      res.status(404).json({ message: 'Task not found or unauthorized' });
-      return;
+      throw new AppError('Task not found or unauthorized', 404);
     }
 
     res.status(200).json(task);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching task', error });
+    throw new AppError('Error fetching task', 500);
   }
 };
 
@@ -48,8 +46,11 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
   const userId = req.auth?.sub; // auth0 user
 
   if (!userId) {
-    res.status(401).json({ message: 'User not authenticated' });
-    return;
+    throw new AppError('User not authenticated', 401);
+  }
+
+  if (!title) {
+    throw new AppError('Title is required', 400);
   }
 
   try {
@@ -58,11 +59,10 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
       completed: false,
       userId,
     });
-
     const savedTask = await newTask.save();
     res.status(201).json(savedTask);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating task', error });
+    throw new AppError('Error creating task', 500);
   }
 };
 
@@ -72,19 +72,17 @@ export const deleteTask = async (req: Request, res: Response): Promise<void> => 
   const userId = req.auth?.sub; // auth0 user
 
   if (!userId) {
-    res.status(401).json({ message: 'User not authenticated' });
-    return;
+    throw new AppError('User not authenticated', 401);
   }
 
   try {
     const task = await Task.findOneAndDelete({ _id: id, userId }); // Aseguramos que coincida con el userId
     if (!task) {
-      res.status(404).json({ message: 'Task not found or unauthorized' });
-      return;
+      throw new AppError('Task not found or unauthorized', 404);
     }
     res.status(200).json({ message: 'Task deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting task', error });
+    throw new AppError('Error deleting task', 500);
   }
 };
 
@@ -96,8 +94,7 @@ export const updateTask = async (req: Request, res: Response): Promise<void> => 
 
   // Check if user was found
   if (!userId) {
-    res.status(401).json({ message: 'User not authenticated' });
-    return;
+    throw new AppError('User not authenticated', 401);
   }
 
   // Check if at least one field (title or completed) is provided
@@ -113,7 +110,6 @@ export const updateTask = async (req: Request, res: Response): Promise<void> => 
     if (title !== undefined) {
       updateFields.title = title;
     }
-
     if (completed !== undefined) {
       updateFields.completed = completed;
     }
@@ -127,14 +123,11 @@ export const updateTask = async (req: Request, res: Response): Promise<void> => 
 
     // If task is not found or unauthorized
     if (!updatedTask) {
-      res.status(404).json({ message: 'Task not found or unauthorized' });
-      return;
+      throw new AppError('Task not found or unauthorized', 404);
     }
-
     // Return the updated task
     res.status(200).json(updatedTask);
   } catch (error) {
-    // Handle errors
-    res.status(500).json({ message: 'Error updating task', error });
+    throw new AppError('Error updating task', 500);
   }
 };
