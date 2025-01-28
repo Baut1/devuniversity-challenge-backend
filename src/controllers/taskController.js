@@ -23,7 +23,7 @@ const getTasks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         throw new errorHandler_1.AppError('User not authenticated', 401);
     }
     try {
-        const tasks = yield Task_1.default.find({ userId });
+        const tasks = yield Task_1.default.find({ userId }).sort({ createdAt: 1 });
         res.status(200).json(tasks);
     }
     catch (error) {
@@ -86,10 +86,14 @@ const deleteTask = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         throw new errorHandler_1.AppError('User not authenticated', 401);
     }
     try {
-        const task = yield Task_1.default.findOneAndDelete({ _id: id, userId }); // Aseguramos que coincida con el userId
+        // try to find task
+        const task = yield Task_1.default.findOne({ _id: id, userId });
+        console.log(task);
         if (!task) {
+            // if task doesnt exist or doesnt belong to user
             throw new errorHandler_1.AppError('Task not found or unauthorized', 404);
         }
+        yield task.deleteOne();
         res.status(200).json({ message: 'Task deleted successfully' });
     }
     catch (error) {

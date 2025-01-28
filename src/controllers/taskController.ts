@@ -10,7 +10,7 @@ export const getTasks = async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    const tasks = await Task.find({ userId });
+    const tasks = await Task.find({ userId }).sort({ createdAt: 1 });
     res.status(200).json(tasks);
   } catch (error) {
     throw new AppError('Error fetching tasks', 500);
@@ -76,10 +76,17 @@ export const deleteTask = async (req: Request, res: Response): Promise<void> => 
   }
 
   try {
-    const task = await Task.findOneAndDelete({ _id: id, userId }); // Aseguramos que coincida con el userId
+    // try to find task
+    const task = await Task.findOne({ _id: id, userId });
+    console.log(task);
+    
+
     if (!task) {
+      // if task doesnt exist or doesnt belong to user
       throw new AppError('Task not found or unauthorized', 404);
     }
+
+    await task.deleteOne();
     res.status(200).json({ message: 'Task deleted successfully' });
   } catch (error) {
     throw new AppError('Error deleting task', 500);
